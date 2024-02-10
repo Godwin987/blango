@@ -4,6 +4,7 @@ from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 from django import template
 from django.http import HttpRequest
+from blog.models import Post
 
 request = HttpRequest()
 
@@ -30,7 +31,12 @@ user_model = get_user_model()
 #   return format_html(f"{prefix}{name}{suffix}")
 
 @register.filter
-def author_details(author, current_user=None):
+def author_details(author, current_user='None'):
+    # request = context["request"]
+    # current_user = request.user
+    # post = context["post"]
+    # author = post.author
+    
     if not isinstance(author, user_model):
         # return empty string as safe default
         return ""
@@ -51,3 +57,24 @@ def author_details(author, current_user=None):
         suffix = ""
 
     return format_html('{}{}{}', prefix, name, suffix)
+
+@register.simple_tag(takes_context=True)
+def row(context, extra_classes=""):
+    return format_html('<div class="row {}">', extra_classes)
+
+@register.simple_tag
+def endrow():
+  return format_html("</div>")
+
+@register.simple_tag(takes_context=True)
+def col(context, extra_classes=""):
+    return format_html('<div class="col {}">', extra_classes)
+
+@register.simple_tag
+def endcol():
+  return format_html("</div>")
+
+@register.inclusion_tag("blog/post-list.html")
+def recent_posts(post):
+  posts = Post.objects.exclude(id=post.id).order_by('-published_at')[:5]
+  return {'title': 'Recent Posts', 'posts':posts}
