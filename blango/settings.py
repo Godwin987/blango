@@ -39,6 +39,12 @@ class Dev(Configuration):
     CSRF_COOKIE_SAMESITE = 'None'
     SESSION_COOKIE_SAMESITE = 'None'
 
+    # Email Backend Setup
+    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+
+    # Activation Days for Django-Registration
+    ACCOUNT_ACTIVATION_DAYS = 7
+
 
     # User Model Config
     AUTH_USER_MODEL = "blango_auth.User"
