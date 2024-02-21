@@ -1,10 +1,10 @@
 from django.db import models
-from django.contrib.auth.models import AbstractUser, UserManager
+from django.contrib.auth.models import AbstractBaseUser, UserManager, AbstractUser, BaseUserManager
 from django.utils.translation import gettext_lazy as _
 
 # Create your models here.
 
-class BlangoUserManager(UserManager):
+class BlangoUserManager(BaseUserManager):
     def _create_user(self, email, password, **extra_fields):
         if not email:
             raise ValueError("Email must be set")
@@ -32,15 +32,21 @@ class BlangoUserManager(UserManager):
 
 
 class User(AbstractUser):
-  email = models.EmailField(
-        _("email address"),
-        unique=True,
-    )
+    
+    email = models.EmailField(
+            _("email address"),
+            unique=True,
+        )
 
-  objects = BlangoUserManager()
+    objects = BlangoUserManager()
 
-  USERNAME_FIELD = "email"
-  REQUIRED_FIELDS = []
+    USERNAME_FIELD = "email"
+    REQUIRED_FIELDS = []
 
-  def __str__(self):
+    def __str__(self):
       return self.email
+
+    def save(self, *args, **kwargs):
+        if not self.pk and not self.username:
+            self.username = self.email
+        super().save(*args, **kwargs)
